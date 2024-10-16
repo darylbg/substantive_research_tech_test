@@ -23,20 +23,23 @@ ChartJS.register(
 );
 
 export default function Product({ product }) {
-  // Prepare the data for the chart
+  // Prep the data for the chart
   const chartData = {
-    labels: product.map((item) => new Date(item.start_date).getFullYear()), // Extract years
+    // Extract year from date
+    labels: product.map((item) => new Date(item.start_date).getFullYear()),
     datasets: [
+      // Add payment price to tooltip
       {
         label: "Payment (Euros)",
-        data: product.map((item) => parseFloat(item.payment)), // Payment values
+        data: product.map((item) => parseFloat(item.payment)),
         borderColor: "rgba(75, 192, 192, 1)",
         backgroundColor: "rgba(75, 192, 192, 0.2)",
         fill: false,
       },
+      // Add benchmark price to tooltip
       {
         label: "Benchmark (Euros)",
-        data: product.map((item) => parseFloat(item.benchmark)), // Benchmark values
+        data: product.map((item) => parseFloat(item.benchmark)),
         borderColor: "rgba(255, 99, 132, 1)",
         backgroundColor: "rgba(255, 99, 132, 0.2)",
         fill: false,
@@ -58,7 +61,7 @@ export default function Product({ product }) {
         callbacks: {
           label: function (tooltipItem) {
             const datasetLabel = tooltipItem.dataset.label || "";
-            const dataPoint = tooltipItem.raw.toFixed(2); // Format data point to 2 decimals
+            const dataPoint = tooltipItem.raw.toFixed(2);
 
             const payment = parseFloat(product[tooltipItem.dataIndex].payment);
             const benchmark = parseFloat(product[tooltipItem.dataIndex].benchmark);
@@ -77,7 +80,7 @@ export default function Product({ product }) {
                   ? `${difference} more than payment`
                   : `${Math.abs(difference)} less than payment`;
             }
-
+            // Difference of Benchmark/Payment amount
             return [`${datasetLabel}: ${dataPoint}`, `${comparison}`];
           },
         },
