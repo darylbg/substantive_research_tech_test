@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/substantive_research_tech_test/static/css/main.0594ef07.css",
+    "main.js": "/substantive_research_tech_test/static/js/main.c0c53296.js",
+    "index.html": "/substantive_research_tech_test/index.html",
+    "main.0594ef07.css.map": "/substantive_research_tech_test/static/css/main.0594ef07.css.map",
+    "main.c0c53296.js.map": "/substantive_research_tech_test/static/js/main.c0c53296.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0594ef07.css",
+    "static/js/main.c0c53296.js"
+  ]
+}
