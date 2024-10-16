@@ -140,7 +140,7 @@ function App() {
 
   return (
     <div className="App">
-      <h2>Provider payments vs benchmarks analyses</h2>
+      <h2>Provider payments vs benchmarks analysis</h2>
       <div>
         {loading && <span>loading...</span>}
         {error && <span>error...</span>}
