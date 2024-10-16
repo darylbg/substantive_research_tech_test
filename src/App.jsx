@@ -29,7 +29,9 @@ function App() {
 
       if (!response.ok) {
         setError("Error fetching product benchmarks...");
-        console.log(`Error fetching product benchmarks, status: ${response.status}`);
+        console.log(
+          `Error fetching product benchmarks, status: ${response.status}`
+        );
         return;
       }
 
@@ -55,7 +57,9 @@ function App() {
 
       if (!response.ok) {
         setError("Error fetching exchange rates...");
-        console.log(`Error fetching exchange rates, status: ${response.status}`);
+        console.log(
+          `Error fetching exchange rates, status: ${response.status}`
+        );
         return;
       }
 
@@ -69,6 +73,7 @@ function App() {
     }
   };
 
+  // get exchange rate for currencies
   const getExchangeRateForCurrency = (fromCurrencyId, year) => {
     const rate = exchangeRates.find(
       (rate) => rate.from_currency_id === fromCurrencyId && rate.year === year
@@ -76,17 +81,21 @@ function App() {
     return rate ? rate.exchange_rate : 1;
   };
 
+  // convert rate amounts to euros
   const convertRateToEuros = () => {
     return productBenchmarks.map((productBenchmark) => {
       const year = new Date(productBenchmark.start_date).getFullYear();
-      const exchangeRate = getExchangeRateForCurrency(productBenchmark.currency.id, year);
+      const exchangeRate = getExchangeRateForCurrency(
+        productBenchmark.currency.id,
+        year
+      );
 
       const benchmarkInEuros = productBenchmark.benchmark * exchangeRate;
       const paymentInEuros = productBenchmark.payment * exchangeRate;
       return {
         ...productBenchmark,
-        benchmark: `${benchmarkInEuros.toFixed(2)} euros`,
-        payment: `${paymentInEuros.toFixed(2)} euros`,
+        benchmark: benchmarkInEuros,
+        payment: paymentInEuros,
       };
     });
   };
@@ -114,50 +123,77 @@ function App() {
     }
   }, [productBenchmarks, exchangeRates]);
 
-  // Calculate total benchmark difference for each provider
-  const calculateDifferenceByProvider = () => {
+  // Calculate total payments, benchmarks, and difference for each provider
+  const calculateTotalsByProvider = () => {
     const groupedData = groupByProvider();
-    const differences = {};
+    const totals = {};
 
     Object.keys(groupedData).forEach((provider) => {
-      let totalDifference = 0;
+      let totalPayments = 0;
+      let totalBenchmarks = 0;
 
       Object.values(groupedData[provider]).forEach((products) => {
         products.forEach((product) => {
           const payment = parseFloat(product.payment);
           const benchmark = parseFloat(product.benchmark);
-          totalDifference += payment - benchmark; // Difference per product
+          totalPayments += payment;
+          totalBenchmarks += benchmark;
         });
       });
 
-      differences[provider] = totalDifference.toFixed(2); // Store total difference for each provider
+      totals[provider] = {
+        totalPayments: totalPayments.toFixed(2),
+        totalBenchmarks: totalBenchmarks.toFixed(2),
+        totalDifference: (totalPayments - totalBenchmarks).toFixed(2),
+      };
     });
 
-    return differences;
+    return totals;
   };
 
-  const providerDifferences = calculateDifferenceByProvider();
+  const providerTotals = calculateTotalsByProvider();
 
   return (
     <div className="App">
-      <h2>Provider payments vs benchmarks analysis</h2>
+      <h2>Provider and product payments vs benchmarks analysis</h2>
       <div>
         {loading && <span>loading...</span>}
         {error && <span>error...</span>}
         <ul>
-          {!loading && !error && Object.keys(groupedByProvider).map((provider, index) => (
-            <li key={index} className="provider-group">
-              <h3>Provider: {provider}</h3>
-              <p>Total benchmark difference (benchmark minus payment): {providerDifferences[provider]} Euros</p>
-              <ul className="product-list">
-                {Object.keys(groupedByProvider[provider]).map((product, subIndex) => (
-                  <li key={subIndex} className="product">
-                    <Product product={groupedByProvider[provider][product]} />
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
+          {!loading &&
+            !error &&
+            Object.keys(groupedByProvider).map((provider, index) => (
+              <li key={index} className="provider-group">
+                <div className="provider-group-header">
+                  <h3>Provider: {provider}</h3>
+                  <p>
+                    Total Payment: {providerTotals[provider].totalPayments}{" "}
+                    Euros
+                  </p>
+                  <p>
+                    Total Benchmark: {providerTotals[provider].totalBenchmarks}{" "}
+                    Euros
+                  </p>
+                  <p>
+                    Total Difference (Payment - Benchmark):{" "}
+                    {providerTotals[provider].totalDifference} Euros
+                  </p>
+                </div>
+
+                <ul className="product-list">
+                  {/* Render a chart for each product grouped by same provider */}
+                  {Object.keys(groupedByProvider[provider]).map(
+                    (product, subIndex) => (
+                      <li key={subIndex} className="product">
+                        <Product
+                          product={groupedByProvider[provider][product]}
+                        />
+                      </li>
+                    )
+                  )}
+                </ul>
+              </li>
+            ))}
         </ul>
       </div>
     </div>
